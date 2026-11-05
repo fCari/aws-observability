@@ -1,0 +1,52 @@
+# Archivos de log
+*.log
+
+# Archivos temporales
+*.tmp
+*.temp
+
+# Backups
+backup-*/
+
+# Datos de Docker volumes (si se exportan)
+prometheus-data/
+grafana-data/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Node.js (si se agrega en el futuro)
+node_modules/
+npm-debug.log*
+
+# Archivos de configuración local
+.env
+.env.local
+.env.production
+
+# Certificados SSL
+*.pem
+*.key
+*.crt
+
+# Archivos temporales de Docker
+.dockerignore 
