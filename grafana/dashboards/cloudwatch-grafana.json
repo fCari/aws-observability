@@ -1,0 +1,230 @@
+{
+  "title": "AWS - EC2 y ECS Fargate (CloudWatch)",
+  "uid": "aws-cloudwatch-ec2-ecs",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "1m",
+  "time": { "from": "now-3h", "to": "now" },
+  "tags": ["aws", "cloudwatch"],
+  "templating": {
+    "list": [
+      {
+        "name": "ds",
+        "label": "Datasource",
+        "type": "datasource",
+        "query": "cloudwatch",
+        "current": {}
+      },
+      {
+        "name": "cluster",
+        "label": "Cluster ECS",
+        "type": "textbox",
+        "query": "mi-cluster",
+        "current": { "text": "mi-cluster", "value": "mi-cluster" }
+      },
+      {
+        "name": "loggroup",
+        "label": "Log group",
+        "type": "textbox",
+        "query": "/ecs/mi-servicio",
+        "current": { "text": "/ecs/mi-servicio", "value": "/ecs/mi-servicio" }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "EC2",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "EC2 - CPU (%) por instancia",
+      "datasource": { "type": "cloudwatch", "uid": "${ds}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100 }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "queryMode": "Metrics",
+          "metricQueryType": 0,
+          "metricEditorMode": 0,
+          "region": "default",
+          "namespace": "AWS/EC2",
+          "metricName": "CPUUtilization",
+          "dimensions": { "InstanceId": "*" },
+          "statistic": "Average",
+          "period": "300",
+          "matchExact": false,
+          "label": "${PROP('Dim.InstanceId')}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "EC2 - Red entrante (bytes)",
+      "datasource": { "type": "cloudwatch", "uid": "${ds}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+      "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "queryMode": "Metrics",
+          "metricQueryType": 0,
+          "metricEditorMode": 0,
+          "region": "default",
+          "namespace": "AWS/EC2",
+          "metricName": "NetworkIn",
+          "dimensions": { "InstanceId": "*" },
+          "statistic": "Average",
+          "period": "300",
+          "matchExact": false,
+          "label": "${PROP('Dim.InstanceId')}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "EC2 - Status checks fallidos",
+      "datasource": { "type": "cloudwatch", "uid": "${ds}" },
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 9 },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": { "reduceOptions": { "calcs": ["max"] }, "colorMode": "background" },
+      "targets": [
+        {
+          "refId": "A",
+          "queryMode": "Metrics",
+          "metricQueryType": 0,
+          "metricEditorMode": 0,
+          "region": "default",
+          "namespace": "AWS/EC2",
+          "metricName": "StatusCheckFailed",
+          "dimensions": { "InstanceId": "*" },
+          "statistic": "Maximum",
+          "period": "300",
+          "matchExact": false
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "row",
+      "title": "ECS / Fargate (Container Insights)",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "ECS - CPU utilizada por servicio",
+      "datasource": { "type": "cloudwatch", "uid": "${ds}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 15 },
+      "targets": [
+        {
+          "refId": "A",
+          "queryMode": "Metrics",
+          "metricQueryType": 0,
+          "metricEditorMode": 0,
+          "region": "default",
+          "namespace": "ECS/ContainerInsights",
+          "metricName": "CpuUtilized",
+          "dimensions": { "ClusterName": "${cluster}", "ServiceName": "*" },
+          "statistic": "Average",
+          "period": "60",
+          "matchExact": false,
+          "label": "${PROP('Dim.ServiceName')}"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "ECS - Memoria utilizada por servicio (MB)",
+      "datasource": { "type": "cloudwatch", "uid": "${ds}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 15 },
+      "fieldConfig": { "defaults": { "unit": "decmbytes" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "queryMode": "Metrics",
+          "metricQueryType": 0,
+          "metricEditorMode": 0,
+          "region": "default",
+          "namespace": "ECS/ContainerInsights",
+          "metricName": "MemoryUtilized",
+          "dimensions": { "ClusterName": "${cluster}", "ServiceName": "*" },
+          "statistic": "Average",
+          "period": "60",
+          "matchExact": false,
+          "label": "${PROP('Dim.ServiceName')}"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "ECS - Tareas en ejecución por servicio",
+      "datasource": { "type": "cloudwatch", "uid": "${ds}" },
+      "gridPos": { "h": 7, "w": 24, "x": 0, "y": 23 },
+      "targets": [
+        {
+          "refId": "A",
+          "queryMode": "Metrics",
+          "metricQueryType": 0,
+          "metricEditorMode": 0,
+          "region": "default",
+          "namespace": "ECS/ContainerInsights",
+          "metricName": "RunningTaskCount",
+          "dimensions": { "ClusterName": "${cluster}", "ServiceName": "*" },
+          "statistic": "Average",
+          "period": "60",
+          "matchExact": false,
+          "label": "${PROP('Dim.ServiceName')}"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "row",
+      "title": "Logs",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 30 }
+    },
+    {
+      "id": 10,
+      "type": "logs",
+      "title": "Logs del servicio (ERROR)",
+      "datasource": { "type": "cloudwatch", "uid": "${ds}" },
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 31 },
+      "options": { "showTime": true, "wrapLogMessage": true, "sortOrder": "Descending" },
+      "targets": [
+        {
+          "refId": "A",
+          "queryMode": "Logs",
+          "region": "default",
+          "id": "",
+          "queryLanguage": "CWLI",
+          "logGroupNames": ["${loggroup}"],
+          "expression": "fields @timestamp, @message, @logStream\n| filter @message like /ERROR/\n| sort @timestamp desc\n| limit 100",
+          "statsGroups": []
+        }
+      ]
+    }
+  ]
+}
